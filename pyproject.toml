@@ -1,0 +1,15 @@
+[project]
+name = "test_turinga"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["flask", "openai"]
+authors = [{ name = "TCA" }]
+
+[tool.setuptools]
+packages = ["test_turinga"]
+package-dir = { "" = "src" }
+
+[project.urls]
+Repository = "https://github.com/Kolo-Naukowe-AI-Star/test-turinga"
