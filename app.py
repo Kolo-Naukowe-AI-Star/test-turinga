@@ -6,6 +6,7 @@ from test_turinga import TuringServer
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser("Turing Test Server")
+    args.add_argument("--model_path", type=str, help="Path to the llm model")
     args.add_argument("--port", type=int, default=5000, help="Port to listen on")
     args.add_argument("--host", type=str, default="0.0.0.0", help="Host to listen on")
     args.add_argument(
@@ -15,6 +16,6 @@ if __name__ == "__main__":
 
     app = Flask(__name__)
 
-    app.register_blueprint(TuringServer())
+    app.register_blueprint(TuringServer(args.model_path))
 
     app.run(host=args.host, port=args.port, debug=args.debug)

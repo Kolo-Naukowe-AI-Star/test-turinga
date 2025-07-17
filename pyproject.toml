@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["flask", "openai"]
+dependencies = ["flask", "llama-cpp-python", "langchain_community"]
 authors = [{ name = "TCA" }]
 
 [tool.setuptools]

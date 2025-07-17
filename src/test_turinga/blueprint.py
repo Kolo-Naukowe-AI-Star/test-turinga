@@ -4,7 +4,7 @@ from typing import Callable
 from flask import request, jsonify, Blueprint, Response, abort
 
 from .thread import Thread
-from .correspondents import Correspondent, User
+from .correspondents import User, AgentFactory
 
 UID_HEADER = "X-User-ID"
 
@@ -34,10 +34,12 @@ def id_required(
 
 class TuringServer(Blueprint):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, model_path: str | None = None, *args, **kwargs):
         super().__init__("turing_server", __name__, *args, **kwargs)
         self.channels: list[Thread] = []
         self.users: dict[str, User] = {}
+        if model_path:
+            self.agent_factory = AgentFactory(model_path)
 
         self.add_url_rule(
             "/messages", "send_message", self.message_received, methods=["POST"]

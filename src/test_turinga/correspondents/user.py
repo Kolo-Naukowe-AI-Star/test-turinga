@@ -1,19 +1,4 @@
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-
-
-# TODO: AI that utilizes this class to receive and respond to messages.
-
-
-@dataclass
-class Correspondent(ABC):
-    """Abstract base class for correspondents."""
-
-    name: str
-
-    @abstractmethod
-    def send_message(self, message: str) -> None:
-        pass
+from .base import Correspondent
 
 
 class User(Correspondent):
@@ -35,6 +20,7 @@ class User(Correspondent):
             message (str): The message to send.
         """
         self.queue.append(message)
+        return None
 
     def pop(self) -> str | None:
         """Pop the next message from the queue.
