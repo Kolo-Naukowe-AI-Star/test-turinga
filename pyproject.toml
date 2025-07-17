@@ -11,5 +11,11 @@ authors = [{ name = "TCA" }]
 packages = ["test_turinga"]
 package-dir = { "" = "src" }
 
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.pytest.ini_options]
+testpaths = ["src/tests"]
+
 [project.urls]
 Repository = "https://github.com/Kolo-Naukowe-AI-Star/test-turinga"

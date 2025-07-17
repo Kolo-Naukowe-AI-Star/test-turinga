@@ -1,7 +1,5 @@
 import argparse
-import os
 from flask import Flask
-from openai import OpenAI
 
 from test_turinga import TuringServer
 
@@ -17,6 +15,6 @@ if __name__ == "__main__":
 
     app = Flask(__name__)
 
-    app.register_blueprint(TuringServer(OpenAI(api_key=os.getenv("OPENAI_API_KEY"))))
+    app.register_blueprint(TuringServer())
 
     app.run(host=args.host, port=args.port, debug=args.debug)

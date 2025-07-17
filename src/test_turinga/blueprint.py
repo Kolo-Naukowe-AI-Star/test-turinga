@@ -1,56 +1,81 @@
-from openai import OpenAI
-from flask import request, jsonify, Blueprint
+import uuid
+from typing import Callable
+
+from flask import request, jsonify, Blueprint, Response, abort
+
+from .thread import Thread
+from .correspondents import Correspondent, User
+
+UID_HEADER = "X-User-ID"
 
 
-# messages are sent via POST request to /send endpoint
-# receive sent messages via GET request /messages
+def id_required(
+    func: Callable[["TuringServer", User], Response]
+) -> Callable[["TuringServer"], Response]:
+    """Decorator to verify that the ID is registered, and retrieve the user."""
+
+    def wrapper(self, *args, **kwargs):
+        user_id = request.headers.get(UID_HEADER)
+        if not user_id:
+            abort(400)
+
+        user = self.users.get(user_id)
+        if not user:
+            abort(403)
+
+        return func(self, user, *args, **kwargs)
+
+    wrapper.__name__ = func.__name__
+    return wrapper
+
+
+# TODO add matchmaking, maybe once a user connects and there's an unassigned channel?
 
 
 class TuringServer(Blueprint):
 
-    def __init__(self, openai_client: OpenAI, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         super().__init__("turing_server", __name__, *args, **kwargs)
-        self.openai_client = openai_client
-        self.messages = []
+        self.channels: list[Thread] = []
+        self.users: dict[str, User] = {}
 
         self.add_url_rule(
-            "/send", "send_message", self.message_received, methods=["POST"]
+            "/messages", "send_message", self.message_received, methods=["POST"]
         )
         self.add_url_rule(
             "/messages", "get_messages", self.retrieve_messages, methods=["GET"]
         )
+        self.add_url_rule("/handshake", "handshake", self.handshake, methods=["GET"])
+        self.add_url_rule("/status", "status", self.retrieve_status, methods=["GET"])
 
-    def message_received(self):
-        data = request.get_json()
-        sender = data.get("sender")
-        receiver = data.get("receiver")
-        text = data.get("text")
-        if not sender or not receiver or not text:
-            return jsonify({"error": "Missing fields"}), 400
+    def find_channel(self, user: User) -> Thread | None:
+        try:
+            return next(c for c in self.channels if user in c)
+        except StopIteration:
+            return None
 
-        if receiver.lower() == "chatgpt":
-            response = self.openai_client.chat.completions.create(
-                model="gpt-3.5-turbo", messages=[{"role": "user", "content": text}]
-            )
-            reply = response.choices[0].message.content
-            self.messages.append({"sender": sender, "receiver": receiver, "text": text})
-            self.messages.append(
-                {"sender": receiver, "receiver": sender, "text": reply}
-            )
-            return jsonify({"status": "Message sent", "reply": reply})
-        else:
-            self.messages.append({"sender": sender, "receiver": receiver, "text": text})
-            return jsonify({"status": "Message sent"})
+    def handshake(self):
+        id = str(uuid.uuid4())
+        self.users[id] = User(id)
+        return jsonify(id=id)
 
-    def retrieve_messages(self):
-        user1 = request.args.get("user1")
-        user2 = request.args.get("user2")
-        if not user1 or not user2:
-            return jsonify({"error": "Missing users"}), 400
-        convo = [
-            m
-            for m in self.messages
-            if (m["sender"] == user1 and m["receiver"] == user2)
-            or (m["sender"] == user2 and m["receiver"] == user1)
-        ]
-        return jsonify({"messages": convo})
+    @id_required
+    def message_received(self, user: User) -> Response:
+        message = request.form.get("content")
+        if not message:
+            abort(400)
+
+        channel = self.find_channel(user)
+        if not channel:
+            abort(400)
+
+        channel.received_message(user, message)
+        return jsonify()
+
+    @id_required
+    def retrieve_messages(self, user: User):
+        return jsonify(messages=user.pop())
+
+    @id_required
+    def retrieve_status(self, user: User):
+        return jsonify(ready=self.find_channel(user) is not None)
