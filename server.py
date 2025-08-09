@@ -1,4 +1,4 @@
-from src.test_turinga.correspondents.ai import AgentFactory
+from src.ai import AgentFactory
 
 import socket
 import threading

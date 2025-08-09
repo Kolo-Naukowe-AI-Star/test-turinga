@@ -1,9 +1,7 @@
-from .base import Correspondent
-
 from langchain_community.llms import LlamaCpp
 
 
-class Agent(Correspondent):
+class Agent:
     """Agent class that utilizes LLM to respond to messages."""
 
     def __init__(self, prompt: str, llm: LlamaCpp):
