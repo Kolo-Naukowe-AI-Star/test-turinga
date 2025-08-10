@@ -4,18 +4,12 @@ version = "0.1.0"
 description = ""
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["flask", "llama-cpp-python", "langchain_community"]
+dependencies = ["llama-cpp-python"]
 authors = [{ name = "TCA" }]
 
 [tool.setuptools]
 packages = ["test_turinga"]
 package-dir = { "" = "src" }
-
-[project.optional-dependencies]
-dev = ["pytest"]
-
-[tool.pytest.ini_options]
-testpaths = ["src/tests"]
 
 [project.urls]
 Repository = "https://github.com/Kolo-Naukowe-AI-Star/test-turinga"

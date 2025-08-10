@@ -2,7 +2,7 @@
 
 ## Setup
 
-run setup.sh in bash to install all needed dependencies / llm
+Run `setup.sh` in bash to install all needed dependencies / llm
 
 ```bash
 python server.py # to start up server (right now it has 50/50 chance for matching with AI / waiting for another user)
@@ -12,8 +12,7 @@ python client.py # to join as user
 ## Tests
 
 ```bash
-pip install -e .[dev]
-pytest
+python3 -m unittest src.tests
 ```
 
 ## LLM

@@ -1,54 +1,32 @@
-import pytest
-from flask import Flask
-from flask.testing import FlaskClient
+import unittest
+import threading
+from socket import socketpair
 
-from test_turinga import TuringServer
+from test_turinga import Server
 
-
-@pytest.fixture()
-def turing_server():
-    server = Flask(__name__)
-    server.config.update(
-        {
-            "TESTING": True,
-        }
-    )
-    server.register_blueprint(TuringServer())
-    yield server
+from .test_llama import MODEL_PATH
 
 
-@pytest.fixture()
-def client(turing_server: Flask):
-    return turing_server.test_client()
+class TestServer(unittest.TestCase):
+    def setUp(self):
+        self.server = Server(MODEL_PATH)
 
+    def test_connect_ai(self):
+        client_socket, recv_socket = socketpair()
+        client_socket.sendall(b"What's your name?")
+        threading.Thread(target=self.server.handle_ai, args=(recv_socket,)).start()
+        resp = client_socket.recv(1024)
+        self.assertIn(b"Alex", resp)
+        client_socket.close()
 
-def test_handshake(client: FlaskClient):
-    response = client.get("/handshake")
-    assert response.status_code == 200
-    assert isinstance(response.json, dict)
-    assert "id" in response.json
-    assert isinstance(response.json["id"], str)
-
-
-def test_retrieve_message(client: FlaskClient):
-    handshake = client.get("/handshake")
-    assert handshake.json
-    id = handshake.json["id"]
-    messages = client.get("/messages", headers={"X-User-ID": id})
-    assert messages.json
-    assert messages.status_code == 200
-    assert not messages.json["messages"]
-
-
-def test_receive_message(client: FlaskClient):
-    handshake = client.get("/handshake")
-    assert handshake.json
-    id = handshake.json["id"]
-    message = client.post(
-        "/messages", headers={"X-User-ID": id}, data={"content": "Hello!"}
-    )
-    assert message.status_code == 400
-    status = client.get("/status", headers={"X-User-ID": id})
-    assert status.status_code == 200
-    assert status.json
-    assert status.json["ready"] == False
+    def test_connect_us(self):
+        a_send, a_recv = socketpair()
+        b_send, b_recv = socketpair()
+        self.server.handle_human(a_recv)
+        self.server.handle_human(b_send)
+        test_string = b"Hello, world!"
+        a_send.sendall(test_string)
+        resp = b_recv.recv(1024)
+        self.assertEqual(test_string, resp)
+        a_send.close()
+        b_recv.close()

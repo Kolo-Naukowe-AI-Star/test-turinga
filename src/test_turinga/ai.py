@@ -1,11 +1,15 @@
+from logging import getLogger
+
 from langchain_community.llms import LlamaCpp
+
+logger = getLogger(__name__)
 
 
 class Agent:
     """Agent class that utilizes LLM to respond to messages."""
 
     def __init__(self, prompt: str, llm: LlamaCpp):
-        print("[DEBUG] Agent __init__ called")
+        logger.debug("Agent __init__ called")
         self.prompt = prompt
         self.llm = llm
 
@@ -16,13 +20,12 @@ class Agent:
             "<</SYS>>\n"
             f"{message.strip()} [/INST]"
         )
-        print("\n[DEBUG] Sending prompt to LLM:")
-        print(prompt)
+        logger.debug("Sending prompt to LLM:" + prompt)
         response = self.llm.invoke(prompt, max_tokens=64, stop=["[/INST]"])
-        print(f"[DEBUG] LLM response: {response!r}")
+        logger.debug(f"LLM response: {response!r}")
         if not response:
-            print("[DEBUG] No response received from LLM.")
-        return response.strip().split('\n')[0] if response else "[No response]"
+            logger.warning("No response received from LLM.")
+        return response.strip().split("\n")[0] if response else "[No response]"
 
 
 MASTER_PROMPT = (
@@ -41,14 +44,14 @@ MASTER_PROMPT = (
 class AgentFactory:
 
     def __init__(self, model_path: str):
-        print("[DEBUG] Loading LlamaCpp model...")
+        logger.debug("Loading LlamaCpp model...")
         self.llm = LlamaCpp(
             # for now set lower specs for better performance, need to test on better hardware
             model_path=model_path,
             n_gpu_layers=3,
-            #n_batch=1024,
+            # n_batch=1024,
             n_batch=256,
-            #n_ctx=4096,
+            # n_ctx=4096,
             n_ctx=1024,
             f16_kv=False,
             temperature=0.7,
@@ -56,9 +59,9 @@ class AgentFactory:
             top_k=40,
             verbose=False,
         )
-        print("[DEBUG] LlamaCpp model loaded.")
+        logger.debug("LlamaCpp model loaded.")
 
     def new_agent(self, name: str, age: int) -> Agent:
         prompt = MASTER_PROMPT.format(name=name, age=age)
-        print(f"[DEBUG] Creating new agent with prompt:\n{prompt}\n")
+        logger.debug(f"Creating new agent with prompt:\n{prompt}\n")
         return Agent(prompt=prompt, llm=self.llm)
