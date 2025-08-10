@@ -1,14 +1,14 @@
 import socket
 import threading
 
+from test_turinga import Message
+
 
 def receive_messages(client_socket: socket.socket) -> None:
     while True:
         try:
-            data = client_socket.recv(1024).decode()
-            if not data:
-                break
-            print("\nReceived from partner: " + data)
+            message = Message.read(client_socket)
+            print("Received from partner: " + message)
         except:
             break
 
@@ -26,8 +26,7 @@ def client_program(host: str | None = None, port: int = 5000):
     ).start()
 
     while True:
-        message = input()
-        client_socket.send(message.encode())
+        client_socket.send(Message(input()).bytes)
 
 
 if __name__ == "__main__":

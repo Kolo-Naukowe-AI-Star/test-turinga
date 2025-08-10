@@ -1,4 +1,5 @@
 from logging import getLogger
+from typing import Sequence
 
 from langchain_community.llms import LlamaCpp
 
@@ -13,10 +14,14 @@ class Agent:
         self.prompt = prompt
         self.llm = llm
 
-    def send_message(self, message: str) -> str:
+    def send_message(
+        self, message: str, previous_messages: Sequence[str] | None = None
+    ) -> str:
         prompt = (
             "[INST] <<SYS>>\n"
             f"{self.prompt.strip()}\n"
+            "Previous messages: "
+            f"{', '.join(previous_messages) if previous_messages else 'None'}"
             "<</SYS>>\n"
             f"{message.strip()} [/INST]"
         )

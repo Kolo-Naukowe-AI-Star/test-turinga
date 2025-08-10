@@ -5,8 +5,8 @@
 Run `setup.sh` in bash to install all needed dependencies / llm
 
 ```bash
-python server.py # to start up server (right now it has 50/50 chance for matching with AI / waiting for another user)
-python client.py # to join as user
+./server_ai.sh
+python client.py
 ```
 
 ## Tests
