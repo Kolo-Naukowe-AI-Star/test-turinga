@@ -8,10 +8,8 @@ from .handlers import MessageHandler
 
 logger = logging.getLogger(__name__)
 
-RECV_BUFFER_SIZE = 1024
 
-
-class Server:
+class ChatServer:
     def __init__(self, handlers: Sequence[MessageHandler]):
         self.handlers = handlers
         logger.info("Server initialized")

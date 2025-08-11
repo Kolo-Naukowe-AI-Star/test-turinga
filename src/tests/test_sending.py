@@ -2,7 +2,7 @@ import unittest
 import threading
 from socket import socketpair
 
-from test_turinga import Server, Message, AIHandler, UserHandler
+from test_turinga import ChatServer as Server, Message, AIHandler, UserHandler
 
 from .test_llama import MODEL_PATH
 

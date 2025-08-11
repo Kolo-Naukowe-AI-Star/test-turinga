@@ -1,9 +1,9 @@
-from test_turinga import Server, AIHandler, UserHandler, MessageHandler
+import argparse
+from test_turinga import ChatServer, AIHandler, UserHandler, MessageHandler
 import logging
 
 
 if __name__ == "__main__":
-    import argparse
 
     parser = argparse.ArgumentParser("Turing Test Socket Server")
     parser.add_argument(
@@ -30,5 +30,5 @@ if __name__ == "__main__":
     if args.model_path:
         handlers.append(AIHandler(args.model_path))
 
-    server = Server(handlers)
+    server = ChatServer(handlers)
     server.main(args.host, args.port)
