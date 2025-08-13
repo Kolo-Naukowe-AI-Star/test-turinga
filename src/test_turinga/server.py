@@ -13,6 +13,8 @@ RECV_BUFFER_SIZE = 1024
 
 class Server:
     def __init__(self, handlers: Sequence[MessageHandler]):
+        if len(handlers) == 0:
+            raise ValueError("At least one handler must be provided")
         self.handlers = handlers
         logger.info("Server initialized")
 

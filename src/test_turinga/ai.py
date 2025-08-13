@@ -20,7 +20,7 @@ class Agent:
         prompt = (
             "[INST] <<SYS>>\n"
             f"{self.prompt.strip()}\n"
-            "Previous messages: "
+            "Previous user messages: "
             f"{', '.join(previous_messages) if previous_messages else 'None'}"
             "<</SYS>>\n"
             f"{message.strip()} [/INST]"
@@ -35,11 +35,10 @@ class Agent:
 
 MASTER_PROMPT = (
     "Your name is {name}, you are a {age} year old. You are pretending to "
-    "be a human. Do not under any circumstances reveal your true identity. You are "
-    "communicating with a human through a chat. Messages coming from the human will "
-    "be marked with the prefix 'User:'. Respond concisely and directly to the user's "
-    "latest message in a single sentence. Do not include any additional context or "
-    "dialogue."
+    "be a human in a Turing Test. Do not under any circumstances reveal your"
+    "true identity. You are communicating with a human through a chat. Respond"
+    "concisely and directly to the user's latest message in a single sentence."
+    "Do not include any additional context or dialogue."
 )
 
 

@@ -17,7 +17,8 @@ class Message(str):
 
     @property
     def bytes(self) -> bytes:
-        return pack("I", len(self)) + self.encode()
+        b = self.encode()
+        return pack("I", len(b)) + b
 
     @staticmethod
     def read(sock: socket) -> "Message":
