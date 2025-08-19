@@ -27,26 +27,45 @@ class Client:
         )
         self.send_button.pack(side=tk.LEFT, padx=(5, 10), pady=(0, 10))
 
+        # Turn indicator
+        self.turn_label = tk.Label(self.master, text="")
+        self.turn_label.pack(side=tk.LEFT, padx=(0, 10), pady=(0, 10))
+
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect((host, port))
 
         self.running = True
+        self.can_send = True
+        self._update_turn_ui(enabled=True)
         threading.Thread(target=self.receive_messages, daemon=True).start()
 
         self.master.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def send_message(self, event: tk.Event | None = None) -> None:
         msg = self.entry.get()
-        if msg:
+        if msg and self.can_send:
             self.client_socket.sendall(Message(msg).bytes)
             self.entry.delete(0, tk.END)
             self.append_message("You: " + msg)
+            # Disable input if not your turn
+            self.can_send = False
+            self._update_turn_ui(enabled=False)
 
     def receive_messages(self) -> None:
         while self.running:
             try:
                 msg = Message.read(self.client_socket)
-                self.append_message("Server: " + msg)
+                text = str(msg)
+                # Handle optional turn-control messages
+                if text.startswith("TURN:"):
+                    if text == "TURN:YOU":
+                        self.can_send = True
+                        self._update_turn_ui(enabled=True)
+                    elif text == "TURN:WAIT":
+                        self.can_send = False
+                        self._update_turn_ui(enabled=False)
+                    continue
+                self.append_message("Partner: " + text)
             except StopIteration:
                 self.on_close()
 
@@ -55,6 +74,12 @@ class Client:
         self.text_area.insert(tk.END, msg + "\n")
         self.text_area.config(state="disabled")
         self.text_area.see(tk.END)
+
+    def _update_turn_ui(self, *, enabled: bool) -> None:
+        state = "normal" if enabled else "disabled"
+        self.entry.config(state=state)
+        self.send_button.config(state=state)
+        self.turn_label.config(text=("Your turn" if enabled else "Wait for your turn"))
 
     def on_close(self) -> None:
         self.running = False

@@ -21,24 +21,44 @@ class UserHandler(MessageHandler):
                 logger.info(
                     f"Matching human client {client_socket} with {partner_socket}"
                 )
-                # Start relaying messages between the two clients
                 threading.Thread(
-                    target=handle_client, args=(client_socket, partner_socket)
-                ).start()
-                threading.Thread(
-                    target=handle_client, args=(partner_socket, client_socket)
+                    target=handle_turns, args=(client_socket, partner_socket)
                 ).start()
             else:
                 logger.debug(f"Waiting for human client {client_socket}")
                 self.waiting_clients.append(client_socket)
 
 
-def handle_client(client_socket: socket, partner_socket: socket) -> None:
+def handle_turns(client_a: socket, client_b: socket) -> None:
+    current_sender = client_a
+    current_receiver = client_b
+    
+    # Send initial turn notifications to frontends
+    try:
+        client_a.send(Message("TURN:YOU").bytes)
+        client_b.send(Message("TURN:WAIT").bytes)
+    except Exception:
+        pass
+    
     try:
         while True:
-            partner_socket.send(Message.read(client_socket).bytes)
+            message = Message.read(current_sender)
+            current_receiver.send(message.bytes)
+
+            # Swap turns
+            current_sender, current_receiver = current_receiver, current_sender
+            
+            # Send notifications to clients
+            try:
+                current_sender.send(Message("TURN:YOU").bytes)
+                current_receiver.send(Message("TURN:WAIT").bytes)
+            except Exception:
+                pass
+                
     except StopIteration:
         pass
     finally:
-        client_socket.close()
-        partner_socket.close()
+        try:
+            client_a.close()
+        finally:
+            client_b.close()
