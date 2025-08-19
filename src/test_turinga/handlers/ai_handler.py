@@ -21,13 +21,26 @@ class AIHandler(MessageHandler):
         logger.debug(f"Attaching AI agent to {client_socket}")
         message_log: list[Message] = []
         agent = self.agent_factory.new_agent(*choice(self.identity_bank))
+        
+        # Send turn notification
+        try:
+            client_socket.send(Message("TURN:YOU").bytes)
+        except Exception:
+            pass
+            
         try:
             while True:
                 user_message = Message.read(client_socket)
+                # Send AI response
                 client_socket.send(
                     Message(agent.send_message(user_message, message_log)).bytes
                 )
                 message_log.append(user_message)
+                # turn back to user
+                try:
+                    client_socket.send(Message("TURN:YOU").bytes)
+                except Exception:
+                    pass
         except StopIteration:
             pass
         finally:
