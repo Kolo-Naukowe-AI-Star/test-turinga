@@ -17,11 +17,23 @@ class Agent:
     def send_message(
         self, message: str, previous_messages: Sequence[str] | None = None
     ) -> str:
+        # Include a short context window, but instruct the model to respond only to the latest user message.
+        history_window = 5
+        history: list[str] = []
+        if previous_messages:
+            # Keep only the last few to limit prompt length
+            history = [str(m).strip() for m in previous_messages[-history_window:]]
+
+        context_block = (
+            "No previous messages." if not history
+            else "Conversation context (previous user messages): " + "; ".join(history)
+        )
+
         prompt = (
             "[INST] <<SYS>>\n"
             f"{self.prompt.strip()}\n"
-            "Previous user messages: "
-            f"{', '.join(previous_messages) if previous_messages else 'None'}"
+            f"{context_block}\n"
+            "Respond only to the latest user message below. Do not ask follow-up questions.\n"
             "<</SYS>>\n"
             f"{message.strip()} [/INST]"
         )
@@ -36,8 +48,9 @@ class Agent:
 MASTER_PROMPT = (
     "Your name is {name}, you are a {age} year old. You are pretending to "
     "be a human in a Turing Test. Do not under any circumstances reveal your"
-    "true identity. You are communicating with a human through a chat. Respond"
-    "concisely and directly to the user's latest message in a single sentence."
+    "true identity. Chat with the user as if you're just a normal teenager."
+    "Keep answers short, casual, and focused only on what they just said in" 
+    "the latest message. Answer in a single sentence."
     "Do not include any additional context or dialogue."
 )
 
