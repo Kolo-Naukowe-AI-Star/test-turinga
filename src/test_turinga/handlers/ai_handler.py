@@ -1,10 +1,10 @@
-from socket import socket
 import logging
 from random import choice
+from socket import socket
 
-from .base import MessageHandler
-from ..message import Message
-from ..ai import AgentFactory
+from test_turinga.ai import AgentFactory
+from test_turinga.handlers.base import MessageHandler
+from test_turinga.message import Message
 
 logger = logging.getLogger(__name__)
 
@@ -21,13 +21,13 @@ class AIHandler(MessageHandler):
         logger.debug(f"Attaching AI agent to {client_socket}")
         message_log: list[Message] = []
         agent = self.agent_factory.new_agent(*choice(self.identity_bank))
-        
+
         # Send turn notification
         try:
             client_socket.send(Message("TURN:YOU").bytes)
         except Exception:
             pass
-            
+
         try:
             while True:
                 user_message = Message.read(client_socket)

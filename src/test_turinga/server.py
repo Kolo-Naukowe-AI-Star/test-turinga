@@ -1,10 +1,10 @@
-from socket import socket, AF_INET, SOCK_STREAM
+import logging
 import threading
 from random import choice
-import logging
+from socket import AF_INET, SOCK_STREAM, socket
 from typing import Sequence
 
-from .handlers import MessageHandler
+from test_turinga.handlers.base import MessageHandler
 
 logger = logging.getLogger(__name__)
 

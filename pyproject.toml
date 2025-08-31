@@ -1,15 +1,22 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "test_turinga"
 version = "0.1.0"
-description = ""
+description = "LLM Turing test multiplayer game"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["llama-cpp-python"]
-authors = [{ name = "TCA" }]
-
-[tool.setuptools]
-packages = ["test_turinga"]
-package-dir = { "" = "src" }
+dependencies = ["llama-cpp-python", "langchain_community", "pytest"]
+authors = [
+  { name = "TCA" },
+  {name = "Dewaszmi", email = "maciej.zyczynski@protonmail.com"}
+]
 
 [project.urls]
-Repository = "https://github.com/Kolo-Naukowe-AI-Star/test-turinga"
+url = "https://github.com/Kolo-Naukowe-AI-Star/test-turinga"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+

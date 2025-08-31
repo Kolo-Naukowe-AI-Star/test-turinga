@@ -1,5 +1,6 @@
-from struct import pack, unpack, error as StructError
 from socket import socket
+from struct import error as StructError
+from struct import pack, unpack
 
 MAX_LEN = 2**32 - 1
 

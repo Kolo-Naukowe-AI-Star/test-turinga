@@ -1,8 +1,12 @@
-from test_turinga import Server, AIHandler, UserHandler, MessageHandler
 import logging
 
+from test_turinga.handlers.ai_handler import AIHandler
+from test_turinga.handlers.base import MessageHandler
+from test_turinga.handlers.user_handler import UserHandler
+from test_turinga.server import Server
 
-if __name__ == "__main__":
+
+def main():
     import argparse
 
     parser = argparse.ArgumentParser("Turing Test Socket Server")
@@ -32,3 +36,7 @@ if __name__ == "__main__":
 
     server = Server(handlers)
     server.main(args.host, args.port)
+
+
+if __name__ == "__main__":
+    main()

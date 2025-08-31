@@ -1,18 +1,20 @@
 # test-turinga
 
+TODO: Update
+
 ## Setup
 
 Run `setup.sh` in bash to install all needed dependencies / llm
 
 ```bash
-./server_ai.sh
-python client.py
+./runserver.sh
+./runclient.sh
 ```
 
 ## Tests
 
 ```bash
-python3 -m unittest src.tests
+pytest -v tests/
 ```
 
 ## LLM

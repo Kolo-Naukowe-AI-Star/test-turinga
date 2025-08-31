@@ -25,7 +25,8 @@ class Agent:
             history = [str(m).strip() for m in previous_messages[-history_window:]]
 
         context_block = (
-            "No previous messages." if not history
+            "No previous messages."
+            if not history
             else "Conversation context (previous user messages): " + "; ".join(history)
         )
 
@@ -49,7 +50,7 @@ MASTER_PROMPT = (
     "Your name is {name}, you are a {age} year old. You are pretending to "
     "be a human in a Turing Test. Do not under any circumstances reveal your"
     "true identity. Chat with the user as if you're just a normal teenager."
-    "Keep answers short, casual, and focused only on what they just said in" 
+    "Keep answers short, casual, and focused only on what they just said in"
     "the latest message. Answer in a single sentence."
     "Do not include any additional context or dialogue."
 )

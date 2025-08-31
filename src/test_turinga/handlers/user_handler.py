@@ -1,9 +1,9 @@
+import logging
 import threading
 from socket import socket
-import logging
 
-from .base import MessageHandler
-from ..message import Message
+from test_turinga.handlers.base import MessageHandler
+from test_turinga.message import Message
 
 logger = logging.getLogger(__name__)
 
@@ -32,14 +32,14 @@ class UserHandler(MessageHandler):
 def handle_turns(client_a: socket, client_b: socket) -> None:
     current_sender = client_a
     current_receiver = client_b
-    
+
     # Send initial turn notifications to frontends
     try:
         client_a.send(Message("TURN:YOU").bytes)
         client_b.send(Message("TURN:WAIT").bytes)
     except Exception:
         pass
-    
+
     try:
         while True:
             message = Message.read(current_sender)
@@ -47,14 +47,14 @@ def handle_turns(client_a: socket, client_b: socket) -> None:
 
             # Swap turns
             current_sender, current_receiver = current_receiver, current_sender
-            
+
             # Send notifications to clients
             try:
                 current_sender.send(Message("TURN:YOU").bytes)
                 current_receiver.send(Message("TURN:WAIT").bytes)
             except Exception:
                 pass
-                
+
     except StopIteration:
         pass
     finally:
