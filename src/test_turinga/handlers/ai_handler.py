@@ -31,16 +31,18 @@ class AIHandler(MessageHandler):
         try:
             while True:
                 user_message = Message.read(client_socket)
-                # Send AI response
-                client_socket.send(
-                    Message(agent.send_message(user_message, message_log)).bytes
-                )
-                message_log.append(user_message)
+
+                message_log.append(f"Użytkownik: {user_message}")
+                response = agent.send_message(user_message, message_log)
+
+                message_log.append(f"Partner: {response}")
+                client_socket.send(Message(response).bytes)
                 # turn back to user
                 try:
                     client_socket.send(Message("TURN:YOU").bytes)
                 except Exception:
                     pass
+
         except StopIteration:
             pass
         finally:

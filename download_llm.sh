@@ -1,3 +1,3 @@
 #!/usr/bin/bash
 
-wget -P models/ https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/resolve/main/llama-2-13b-chat.Q5_K_M.gguf
+wget -P models/ https://huggingface.co/speakleash/Bielik-11B-v2.3-Instruct-GGUF/resolve/main/Bielik-11B-v2.3-Instruct.Q8_0.gguf

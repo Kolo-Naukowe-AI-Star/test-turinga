@@ -31,4 +31,5 @@ class Server:
 
     def handle(self, client_socket: socket) -> None:
         handler = choice(self.handlers)
+        logger.info(f"Using handler {handler} for client {client_socket}")
         handler.handle(client_socket)
