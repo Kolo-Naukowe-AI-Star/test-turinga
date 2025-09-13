@@ -8,6 +8,10 @@ from test_turinga.message import Message
 
 logger = logging.getLogger(__name__)
 
+MAX_TURNS = 5
+TURN_DELAY = 20 # seconds to ensure equal turn time for humans and AI
+# turn delay not implemented yet for easier testing
+
 
 class AIHandler(MessageHandler):
     def __init__(
@@ -21,6 +25,7 @@ class AIHandler(MessageHandler):
         logger.debug(f"Attaching AI agent to {client_socket}")
         message_log: list[Message] = []
         agent = self.agent_factory.new_agent(*choice(self.identity_bank))
+        turn_count = 0
 
         # Send turn notification
         try:
@@ -33,6 +38,25 @@ class AIHandler(MessageHandler):
                 user_message = Message.read(client_socket)
 
                 message_log.append(f"Użytkownik: {user_message}")
+
+                turn_count += 1
+                if turn_count >= MAX_TURNS:
+                    try:
+                        client_socket.send(
+                            Message("DECISION: Who do you think it was? HUMAN or AI?").bytes
+                        )
+                    except Exception:
+                        pass
+
+                    try:
+                        guess = Message.read(client_socket)
+                        guess_text = str(guess).strip().upper()
+                        result = "Correct!" if guess_text == "AI" else "Wrong!"
+                        client_socket.send(Message(result).bytes)
+                    except Exception:
+                        pass
+                    break
+
                 response = agent.send_message(user_message, message_log)
 
                 message_log.append(f"Partner: {response}")
@@ -47,4 +71,3 @@ class AIHandler(MessageHandler):
             pass
         finally:
             logger.info(f"Detaching AI agent from {client_socket}")
-            client_socket.close()

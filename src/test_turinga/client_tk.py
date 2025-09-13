@@ -31,6 +31,10 @@ class Client:
         self.turn_label = tk.Label(self.master, text="")
         self.turn_label.pack(side=tk.LEFT, padx=(0, 10), pady=(0, 10))
 
+        # Frame for decision buttons
+        self.decision_frame = tk.Frame(self.master)
+        self.decision_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=10)
+
         self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.client_socket.connect((host, port))
 
@@ -65,9 +69,52 @@ class Client:
                         self.can_send = False
                         self._update_turn_ui(enabled=False)
                     continue
+                # Handle decision message
+                if text.startswith("DECISION:"):
+                    self.append_message(text.replace("DECISION:", ""))
+
+                    self.can_send = False
+                    self._update_turn_ui(enabled=False)
+    
+                    self.show_decision_buttons()
+                    continue
+
+                if text in ("Correct!", "Wrong!"):
+                    self.append_message("Result: " + text)
+                    continue
+
                 self.append_message("Partner: " + text)
             except StopIteration:
-                self.on_close()
+                pass
+
+    def send_decision(self, decision: str):
+        self.client_socket.sendall(Message(decision).bytes)
+        self.append_message(f"You decided: {decision}")
+
+        for widget in self.decision_frame.winfo_children():
+            widget.destroy()
+
+    def show_decision_buttons(self):
+        for widget in self.decision_frame.winfo_children():
+            widget.destroy()
+
+        tk.Label(self.decision_frame, text="Who do you think it was?").pack(side=tk.LEFT, padx=5)
+
+        human_button = tk.Button(
+            self.decision_frame,
+            text="Human",
+            command=lambda: self.send_decision("HUMAN"),
+            width=10
+        )
+        human_button.pack(side=tk.LEFT, padx=5)
+
+        ai_button = tk.Button(
+            self.decision_frame,
+            text="AI",
+            command=lambda: self.send_decision("AI"),
+            width=10
+        )
+        ai_button.pack(side=tk.LEFT, padx=5)
 
     def append_message(self, msg: str) -> None:
         self.text_area.config(state="normal")
