@@ -1,5 +1,5 @@
 import logging
-from random import choice
+import random
 from socket import socket
 
 from test_turinga.ai import AgentFactory
@@ -7,10 +7,6 @@ from test_turinga.handlers.base import MessageHandler
 from test_turinga.message import Message
 
 logger = logging.getLogger(__name__)
-
-MAX_TURNS = 5
-TURN_DELAY = 20 # seconds to ensure equal turn time for humans and AI
-# turn delay not implemented yet for easier testing
 
 
 class AIHandler(MessageHandler):
@@ -22,52 +18,53 @@ class AIHandler(MessageHandler):
         self.identity_bank = identity_bank
 
     def handle(self, client_socket: socket) -> None:
-        logger.debug(f"Attaching AI agent to {client_socket}")
-        message_log: list[Message] = []
-        agent = self.agent_factory.new_agent(*choice(self.identity_bank))
-        turn_count = 0
+        message_log: list[str] = []
+        agent = self.agent_factory.new_agent(*random.choice(self.identity_bank))
 
-        # Send turn notification
-        try:
-            client_socket.send(Message("TURN:YOU").bytes)
-        except Exception:
-            pass
+        ai_starts = random.choice([False])
+        starting_player = "ai" if ai_starts else "player"
+        logger.debug(f"starting_player: {starting_player}")
+
+        if ai_starts:
+            logger.debug("AI is starting the conversation...")
+            response = agent.send_message(None, message_log)
+            logger.debug(f"AI response: {response}")
+            message_log.append(f"Partner: {response}")
+            self.safe_send(client_socket, response)
+
+        self.safe_send(client_socket, "TURN:YOU")
 
         try:
             while True:
+                logger.debug("Waiting for user message...")
                 user_message = Message.read(client_socket)
-
+                logger.debug(f"Received from user: {user_message}")
                 message_log.append(f"Użytkownik: {user_message}")
+                self.increment_turn()
 
-                turn_count += 1
-                if turn_count >= MAX_TURNS:
-                    try:
-                        client_socket.send(
-                            Message("DECISION: Who do you think it was? HUMAN or AI?").bytes
-                        )
-                    except Exception:
-                        pass
-
-                    try:
-                        guess = Message.read(client_socket)
-                        guess_text = str(guess).strip().upper()
-                        result = "Correct!" if guess_text == "AI" else "Wrong!"
-                        client_socket.send(Message(result).bytes)
-                    except Exception:
-                        pass
+                if self.is_max_turns():
+                    logger.debug("Max turns reached, sending decision prompt")
+                    self.safe_send(
+                        client_socket, "DECISION: Who do you think it was? HUMAN or AI?"
+                    )
+                    guess = Message.read(client_socket)
+                    logger.debug(f"User guess: {guess}")
+                    guess_text = str(guess).strip().upper()
+                    result = "Correct!" if guess_text == "AI" else "Wrong!"
+                    self.safe_send(client_socket, result)
                     break
 
-                response = agent.send_message(user_message, message_log)
-
+                logger.debug("AI generating response...")
+                response = agent.send_message(str(user_message), message_log)
+                logger.debug(f"AI response: {response}")
                 message_log.append(f"Partner: {response}")
-                client_socket.send(Message(response).bytes)
-                # turn back to user
-                try:
-                    client_socket.send(Message("TURN:YOU").bytes)
-                except Exception:
-                    pass
+                self.safe_send(client_socket, response)
+                self.safe_send(client_socket, "TURN:YOU")
+                logger.debug("Turn:YOU sent to client")
 
         except StopIteration:
-            pass
+            logger.debug("Conversation stopped by StopIteration")
+        except Exception as e:
+            logger.error(f"Exception in AIHandler: {e}")
         finally:
             logger.info(f"Detaching AI agent from {client_socket}")
