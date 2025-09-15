@@ -21,21 +21,25 @@ class AIHandler(MessageHandler):
         message_log: list[str] = []
         agent = self.agent_factory.new_agent(*random.choice(self.identity_bank))
 
-        ai_starts = random.choice([False])
+        ai_starts = random.choice([True, False])
         starting_player = "ai" if ai_starts else "player"
         logger.debug(f"starting_player: {starting_player}")
 
         if ai_starts:
+            self.safe_send(client_socket, "TURN:WAIT")
+            self.save_time()
             logger.debug("AI is starting the conversation...")
+            # AI sends first message (history is empty)
             response = agent.send_message(None, message_log)
             logger.debug(f"AI response: {response}")
             message_log.append(f"Partner: {response}")
             self.safe_send(client_socket, response)
-
-        self.safe_send(client_socket, "TURN:YOU")
+            self.wait()
+            self.increment_turn()
 
         try:
             while True:
+                self.safe_send(client_socket, "TURN:YOU")
                 logger.debug("Waiting for user message...")
                 user_message = Message.read(client_socket)
                 logger.debug(f"Received from user: {user_message}")
@@ -43,24 +47,29 @@ class AIHandler(MessageHandler):
                 self.increment_turn()
 
                 if self.is_max_turns():
-                    logger.debug("Max turns reached, sending decision prompt")
-                    self.safe_send(
-                        client_socket, "DECISION: Who do you think it was? HUMAN or AI?"
-                    )
-                    guess = Message.read(client_socket)
-                    logger.debug(f"User guess: {guess}")
-                    guess_text = str(guess).strip().upper()
-                    result = "Correct!" if guess_text == "AI" else "Wrong!"
-                    self.safe_send(client_socket, result)
                     break
 
+                self.safe_send(client_socket, "TURN:WAIT")
                 logger.debug("AI generating response...")
                 response = agent.send_message(str(user_message), message_log)
                 logger.debug(f"AI response: {response}")
                 message_log.append(f"Partner: {response}")
                 self.safe_send(client_socket, response)
-                self.safe_send(client_socket, "TURN:YOU")
-                logger.debug("Turn:YOU sent to client")
+                self.increment_turn()
+
+                if self.is_max_turns():
+                    break
+
+            # Turn limit reached
+            logger.debug("Max turns reached, sending decision prompt")
+            self.safe_send(
+                client_socket, "DECISION: Who do you think it was? HUMAN or AI?"
+            )
+            guess = Message.read(client_socket)
+            logger.debug(f"User guess: {guess}")
+            guess_text = str(guess).strip().upper()
+            result = "Correct!" if guess_text == "AI" else "Wrong!"
+            self.safe_send(client_socket, result)
 
         except StopIteration:
             logger.debug("Conversation stopped by StopIteration")

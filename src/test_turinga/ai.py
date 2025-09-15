@@ -17,11 +17,6 @@ class Agent:
     def send_message(
         self, message: str | None, previous_messages: Sequence[str] | None = None
     ) -> str:
-        if message is None:
-            message = (
-                "(this is a test message, ignore it and start conversation yourself)"
-            )
-
         logger.debug(f"send_message called with message: {message!r}")
         history_window = 16
         history = (
@@ -30,14 +25,14 @@ class Agent:
             else []
         )
 
-        if not previous_messages or len(history) == 0:
-            history.append(f"Użytkownik: {message}")
-
-        context_block = (
-            "Brak poprzednich wiadomości."
-            if not history
-            else "Oto dotychczasowa rozmowa:\n" + "\n".join(history)
-        )
+        if message is None:
+            context_block = "(Pokrótce zacznij rozmowę)"  # "hej"
+        else:
+            context_block = (
+                "Brak poprzednich wiadomości."
+                if not history
+                else "Oto dotychczasowa rozmowa:\n" + "\n".join(history)
+            )
         prompt = f"{self.prompt.strip()}\n{context_block}\nPartner:"
         stop_tokens = ["\nUżytkownik:", "\nPartner:"]
 
@@ -121,7 +116,7 @@ class AgentFactory:
             model_path=model_path,
             n_gpu_layers=-1,
             n_batch=512,
-            n_ctx=16384,
+            n_ctx=1024,
             f16_kv=True,
             verbose=True,
             temperature=0.1,  # temperature = 0.1 is recommended in docs

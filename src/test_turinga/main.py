@@ -36,8 +36,8 @@ def main():
     )
 
     handlers: list[MessageHandler] = []
-    # if not args.no_user:
-    #     handlers.append(UserHandler()) # commented out for debugging
+    if not args.no_user:
+        handlers.append(UserHandler())
     if args.model_path:
         handlers.append(AIHandler(args.model_path))
 
