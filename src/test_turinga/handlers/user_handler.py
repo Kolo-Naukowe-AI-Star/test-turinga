@@ -8,8 +8,9 @@ from test_turinga.message import Message
 logger = logging.getLogger(__name__)
 
 MAX_TURNS = 10
-TURN_DELAY = 20 # seconds to ensure equal turn time for humans and AI
+TURN_DELAY = 20  # seconds to ensure equal turn time for humans and AI
 # turn delay not implemented yet for easier testing
+
 
 class UserHandler(MessageHandler):
     def __init__(self):
@@ -52,8 +53,16 @@ def handle_turns(client_a: socket, client_b: socket) -> None:
 
             if turn_count >= MAX_TURNS:
                 try:
-                    client_a.send(Message("DECISION: Who do you think it was? HUMAN or AI?").bytes)
-                    client_b.send(Message("DECISION: Who do you think it was? HUMAN or AI?").bytes)
+                    client_a.send(
+                        Message(
+                            "DECISION: Who do you think it was? HUMAN or AI?"
+                        ).bytes
+                    )
+                    client_b.send(
+                        Message(
+                            "DECISION: Who do you think it was? HUMAN or AI?"
+                        ).bytes
+                    )
                 except Exception:
                     pass
 
@@ -63,8 +72,12 @@ def handle_turns(client_a: socket, client_b: socket) -> None:
 
                     guess_a_text = str(guess_a).strip().upper()
                     guess_b_text = str(guess_b).strip().upper()
-                    result_a = "Correct!" if guess_a_text == "HUMAN" else "Wrong!"
-                    result_b = "Correct!" if guess_b_text == "HUMAN" else "Wrong!"
+                    result_a = (
+                        "Correct!" if guess_a_text == "HUMAN" else "Wrong!"
+                    )
+                    result_b = (
+                        "Correct!" if guess_b_text == "HUMAN" else "Wrong!"
+                    )
 
                     client_a.send(Message(result_a).bytes)
                     client_b.send(Message(result_b).bytes)

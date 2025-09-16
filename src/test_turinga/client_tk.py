@@ -75,7 +75,7 @@ class Client:
 
                     self.can_send = False
                     self._update_turn_ui(enabled=False)
-    
+
                     self.show_decision_buttons()
                     continue
 
@@ -98,13 +98,15 @@ class Client:
         for widget in self.decision_frame.winfo_children():
             widget.destroy()
 
-        tk.Label(self.decision_frame, text="Who do you think it was?").pack(side=tk.LEFT, padx=5)
+        tk.Label(self.decision_frame, text="Who do you think it was?").pack(
+            side=tk.LEFT, padx=5
+        )
 
         human_button = tk.Button(
             self.decision_frame,
             text="Human",
             command=lambda: self.send_decision("HUMAN"),
-            width=10
+            width=10,
         )
         human_button.pack(side=tk.LEFT, padx=5)
 
@@ -112,7 +114,7 @@ class Client:
             self.decision_frame,
             text="AI",
             command=lambda: self.send_decision("AI"),
-            width=10
+            width=10,
         )
         ai_button.pack(side=tk.LEFT, padx=5)
 
@@ -126,7 +128,9 @@ class Client:
         state = "normal" if enabled else "disabled"
         self.entry.config(state=state)
         self.send_button.config(state=state)
-        self.turn_label.config(text=("Your turn" if enabled else "Wait for your turn"))
+        self.turn_label.config(
+            text=("Your turn" if enabled else "Wait for your turn")
+        )
 
     def on_close(self) -> None:
         self.running = False
@@ -144,7 +148,9 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description=APP_NAME)
-    parser.add_argument("--host", type=str, default="0.0.0.0", help="Server host")
+    parser.add_argument(
+        "--host", type=str, default="0.0.0.0", help="Server host"
+    )
     parser.add_argument("--port", type=int, default=5000, help="Server port")
     args = parser.parse_args()
 

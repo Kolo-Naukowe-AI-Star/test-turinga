@@ -18,9 +18,15 @@ def main():
     parser.add_argument(
         "--no_user", action="store_true", help="Disable user connections"
     )
-    parser.add_argument("--host", type=str, default="0.0.0.0", help="Host to listen on")
-    parser.add_argument("--port", type=int, default=5000, help="Port to listen on")
-    parser.add_argument("--log_level", type=str, default="INFO", help="Logging level")
+    parser.add_argument(
+        "--host", type=str, default="0.0.0.0", help="Host to listen on"
+    )
+    parser.add_argument(
+        "--port", type=int, default=5000, help="Port to listen on"
+    )
+    parser.add_argument(
+        "--log_level", type=str, default="INFO", help="Logging level"
+    )
     args = parser.parse_args()
 
     logging.basicConfig(

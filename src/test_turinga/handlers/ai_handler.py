@@ -9,13 +9,15 @@ from test_turinga.message import Message
 logger = logging.getLogger(__name__)
 
 MAX_TURNS = 5
-TURN_DELAY = 20 # seconds to ensure equal turn time for humans and AI
+TURN_DELAY = 20  # seconds to ensure equal turn time for humans and AI
 # turn delay not implemented yet for easier testing
 
 
 class AIHandler(MessageHandler):
     def __init__(
-        self, model_path: str, identity_bank: list[tuple[str, int]] = [("Alex", 25)]
+        self,
+        model_path: str,
+        identity_bank: list[tuple[str, int]] = [("Alex", 25)],
     ):
         super().__init__()
         self.agent_factory = AgentFactory(model_path)
@@ -23,7 +25,7 @@ class AIHandler(MessageHandler):
 
     def handle(self, client_socket: socket) -> None:
         logger.debug(f"Attaching AI agent to {client_socket}")
-        message_log: list[Message] = []
+        message_log: list[str] = []
         agent = self.agent_factory.new_agent(*choice(self.identity_bank))
         turn_count = 0
 
@@ -43,7 +45,9 @@ class AIHandler(MessageHandler):
                 if turn_count >= MAX_TURNS:
                     try:
                         client_socket.send(
-                            Message("DECISION: Who do you think it was? HUMAN or AI?").bytes
+                            Message(
+                                "DECISION: Who do you think it was? HUMAN or AI?"
+                            ).bytes
                         )
                     except Exception:
                         pass

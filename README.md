@@ -1,6 +1,8 @@
 # test-turinga
 
-TODO: Update
+Turing test showcase for the "Noc Naukowców 2025" event. Not actually at all
+how a Turing test is conducted, but the core idea of checking if a machine can
+pass as human is there.
 
 ## Setup
 
@@ -14,12 +16,11 @@ Run `setup.sh` in bash to install all needed dependencies / llm
 ## Tests
 
 ```bash
-pytest -v tests/
+pytest -v src/tests/
 ```
 
 ## LLM
 
 The LLM is stored on
-[Hugging Face](https://huggingface.co/), specifically [here](https://huggingface.co/TheBloke/Llama-2-13B-chat-GGUF/blob/main/llama-2-13b-chat.Q5_K_M.gguf)
-you can always use the [download_llm.sh](./download_llm.sh) script to
-download it.
+[Hugging Face](https://huggingface.co/), you can always use the
+[download_llm.sh](./download_llm.sh) script to download it.
