@@ -36,7 +36,7 @@ class Agent:
         prompt = f"{self.prompt.strip()}\n{context_block}\nPartner:"
         stop_tokens = ["\nUżytkownik:", "\nPartner:"]
 
-        logger.debug(f"Constructed prompt:\n{prompt}")
+        # logger.debug(f"Constructed prompt:\n{prompt}")
         try:
             response = self.llm.invoke(prompt, stop=stop_tokens)
             logger.debug(f"Raw LLM response: {response}")

@@ -25,24 +25,24 @@ class AIHandler(MessageHandler):
         starting_player = "ai" if ai_starts else "player"
         logger.debug(f"starting_player: {starting_player}")
 
-        if ai_starts:
+        if ai_starts:  # TODO: replace safe send with send
             self.safe_send(client_socket, "TURN:WAIT")
             self.save_time()
             logger.debug("AI is starting the conversation...")
             # AI sends first message (history is empty)
             response = agent.send_message(None, message_log)
-            logger.debug(f"AI response: {response}")
+            # logger.debug(f"AI response: {response}")
+            self.wait()
             message_log.append(f"Partner: {response}")
             self.safe_send(client_socket, response)
-            self.wait()
             self.increment_turn()
 
         try:
             while True:
                 self.safe_send(client_socket, "TURN:YOU")
-                logger.debug("Waiting for user message...")
+                # logger.debug("Waiting for user message...")
                 user_message = Message.read(client_socket)
-                logger.debug(f"Received from user: {user_message}")
+                # logger.debug(f"Received from user: {user_message}")
                 message_log.append(f"Użytkownik: {user_message}")
                 self.increment_turn()
 
@@ -50,10 +50,12 @@ class AIHandler(MessageHandler):
                     break
 
                 self.safe_send(client_socket, "TURN:WAIT")
-                logger.debug("AI generating response...")
+                self.save_time()
+                # logger.debug("AI generating response...")
                 response = agent.send_message(str(user_message), message_log)
-                logger.debug(f"AI response: {response}")
+                # logger.debug(f"AI response: {response}")
                 message_log.append(f"Partner: {response}")
+                self.wait()
                 self.safe_send(client_socket, response)
                 self.increment_turn()
 

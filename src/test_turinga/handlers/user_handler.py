@@ -38,12 +38,14 @@ class UserHandler(MessageHandler):
         try:
             current_sender.send(Message("TURN:YOU").bytes)
             current_receiver.send(Message("TURN:WAIT").bytes)
+            self.save_time()
         except Exception:
             pass
 
         try:
             while True:
                 message = Message.read(current_sender)
+                self.wait()
                 current_receiver.send(message.bytes)
                 self.increment_turn()
 
@@ -78,6 +80,7 @@ class UserHandler(MessageHandler):
                 try:
                     self.safe_send(current_sender, "TURN:YOU")
                     self.safe_send(current_receiver, "TURN:WAIT")
+                    self.save_time()
                 except Exception:
                     pass
 
