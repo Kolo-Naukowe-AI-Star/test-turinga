@@ -1,7 +1,7 @@
 import logging
+import socket
 import threading
 from random import choice
-from socket import AF_INET, SOCK_STREAM, socket
 from typing import Sequence
 
 from test_turinga.handlers.base import MessageHandler
@@ -19,7 +19,8 @@ class Server:
         logger.info("Server initialized")
 
     def main(self, host: str, port: int) -> None:
-        main_socket = socket(AF_INET, SOCK_STREAM)
+        main_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        main_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         main_socket.bind((host, port))
         main_socket.listen()
         logger.debug(f"Server started on {host}:{port}")

@@ -15,35 +15,42 @@ class Agent:
         self.llm = llm
 
     def send_message(
-        self, message: str, previous_messages: Sequence[str] | None = None
+        self, message: str | None, previous_messages: Sequence[str] | None = None
     ) -> str:
-        history_window = 16  # adjust according to model capacity
+        logger.debug(f"send_message called with message: {message!r}")
+        history_window = 16
         history = (
             [str(m).strip() for m in previous_messages[-history_window:]]
             if previous_messages
             else []
         )
 
-        context_block = (
-            "Brak poprzednich wiadomości."
-            if not history
-            else "Oto dotychczasowa rozmowa między tobą (Partner) a Użytkownikiem:\n"
-            + "\n".join(history)
-        )
+        if message is None:
+            context_block = "(Pokrótce zacznij rozmowę)"  # "hej"
+        else:
+            context_block = (
+                "Brak poprzednich wiadomości."
+                if not history
+                else "Oto dotychczasowa rozmowa:\n" + "\n".join(history)
+            )
+        prompt = f"{self.prompt.strip()}\n{context_block}\nPartner:"
+        stop_tokens = ["\nUżytkownik:", "\nPartner:"]
 
-        prompt = (
-            f"{self.prompt.strip()}\n"
-            f"{context_block}\n"
-            f"Użytkownik: {message.strip()}\n"
-            "Partner:"
-        )
+        # logger.debug(f"Constructed prompt:\n{prompt}")
+        try:
+            response = self.llm.invoke(prompt, stop=stop_tokens)
+            logger.debug(f"Raw LLM response: {response}")
+        except Exception as e:
+            logger.error(f"Error calling LLM: {e}")
+            return "[Error in LLM]"
 
-        response = self.llm.invoke(prompt, stop=["\nUżytkownik:", "\nPartner:"])
-
-        logger.debug(f"LLM response: {response!r}")
         if not response:
-            logger.warning("No response received from LLM.")
-        return response.strip() if response else "[No response]"
+            logger.warning("LLM returned empty response")
+            return "[No response]"
+
+        cleaned_response = response.strip()
+        logger.debug(f"Cleaned AI response: {cleaned_response}")
+        return cleaned_response
 
 
 MASTER_PROMPT = (  # Decent prompt for smaller models like 7B
@@ -109,7 +116,7 @@ class AgentFactory:
             model_path=model_path,
             n_gpu_layers=-1,
             n_batch=512,
-            n_ctx=16384,
+            n_ctx=1024,
             f16_kv=True,
             verbose=True,
             temperature=0.1,  # temperature = 0.1 is recommended in docs

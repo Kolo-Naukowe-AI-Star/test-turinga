@@ -1,4 +1,5 @@
 import logging
+import sys
 
 from test_turinga.handlers.ai_handler import AIHandler
 from test_turinga.handlers.base import MessageHandler
@@ -8,6 +9,12 @@ from test_turinga.server import Server
 
 def main():
     import argparse
+
+    logging.basicConfig(
+        level=logging.DEBUG,  # show DEBUG and above
+        format="[%(asctime)s %(levelname)s | %(name)s:%(lineno)d]: %(message)s",
+        stream=sys.stdout,  # ensure output goes to stdout (terminal)
+    )
 
     parser = argparse.ArgumentParser("Turing Test Socket Server")
     parser.add_argument(
@@ -35,8 +42,8 @@ def main():
     )
 
     handlers: list[MessageHandler] = []
-    if not args.no_user:
-        handlers.append(UserHandler())
+    # if not args.no_user:
+    #     handlers.append(UserHandler())
     if args.model_path:
         handlers.append(AIHandler(args.model_path))
 

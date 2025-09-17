@@ -13,6 +13,10 @@ Run `setup.sh` in bash to install all needed dependencies / llm
 ./runclient.sh
 ```
 
+for cuda (works on arch, requires cmake):
+
+CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python --no-cache-dir --force-reinstall
+
 ## Tests
 
 ```bash
