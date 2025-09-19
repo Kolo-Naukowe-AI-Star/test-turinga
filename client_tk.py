@@ -3,7 +3,7 @@ import threading
 import tkinter as tk
 from tkinter import scrolledtext
 
-from test_turinga.message import Message
+from test_turinga import Message
 
 APP_NAME = "Test Turinga Client"
 

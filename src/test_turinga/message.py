@@ -1,6 +1,5 @@
 from socket import socket
-from struct import error as StructError
-from struct import pack, unpack
+from struct import pack, unpack, error as StructError
 
 MAX_LEN = 2**32 - 1
 
@@ -24,7 +23,7 @@ class Message(str):
     @staticmethod
     def read(sock: socket) -> "Message":
         try:
-            length = unpack("I", sock.recv(4))[0]
+            length: int = unpack("I", sock.recv(4))[0]
         except StructError:
             raise StopIteration("Invalid message length")
         content = sock.recv(length).decode()

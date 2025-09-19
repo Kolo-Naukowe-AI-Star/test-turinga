@@ -1,10 +1,7 @@
 import logging
 import sys
 
-from test_turinga.handlers.ai_handler import AIHandler
-from test_turinga.handlers.base import MessageHandler
-from test_turinga.handlers.user_handler import UserHandler
-from test_turinga.server import Server
+from test_turinga import Server, MessageHandler, AIHandler
 
 
 def main():

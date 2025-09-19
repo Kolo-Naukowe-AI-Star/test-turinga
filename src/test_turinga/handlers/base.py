@@ -3,7 +3,7 @@ import time
 from abc import ABC, abstractmethod
 from socket import socket
 
-from test_turinga.message import Message
+from ..message import Message
 
 logger = logging.getLogger(__name__)
 

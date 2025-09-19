@@ -2,8 +2,8 @@ import logging
 import threading
 from socket import socket
 
-from test_turinga.handlers.base import MessageHandler
-from test_turinga.message import Message
+from .base import MessageHandler
+from ..message import Message
 
 logger = logging.getLogger(__name__)
 
@@ -51,10 +51,12 @@ class UserHandler(MessageHandler):
 
                 if self.is_max_turns():
                     self.safe_send(
-                        client_a, "DECISION: Who do you think it was? HUMAN or AI?"
+                        client_a,
+                        "DECISION: Who do you think it was? HUMAN or AI?",
                     )
                     self.safe_send(
-                        client_b, "DECISION: Who do you think it was? HUMAN or AI?"
+                        client_b,
+                        "DECISION: Who do you think it was? HUMAN or AI?",
                     )
                     try:
                         guess_a = Message.read(client_a)
@@ -76,7 +78,10 @@ class UserHandler(MessageHandler):
                     break
 
                 # Swap turns
-                current_sender, current_receiver = current_receiver, current_sender
+                current_sender, current_receiver = (
+                    current_receiver,
+                    current_sender,
+                )
                 try:
                     self.safe_send(current_sender, "TURN:YOU")
                     self.safe_send(current_receiver, "TURN:WAIT")

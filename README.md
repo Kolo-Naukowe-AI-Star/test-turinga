@@ -6,16 +6,46 @@ pass as human is there.
 
 ## Setup
 
-Run `setup.sh` in bash to install all needed dependencies / llm
+### Server
+
+Run `setup.sh` in bash to install all needed dependencies / llm. Then running:
 
 ```bash
-./runserver.sh
-./runclient.sh
+./runserver.sh 5000
 ```
 
-for cuda (works on arch, requires cmake):
+should start the server on port 5000.
 
+#### Cuda
+
+On WMI cluster you will need to activate the conda env:
+
+```bash
+conda activate pytorch-gpu
+```
+
+before running the `setup.sh` script, to ensure that everything installs
+correctly. On arch:
+
+```bash
 CMAKE_ARGS="-DGGML_CUDA=on" pip install llama-cpp-python --no-cache-dir --force-reinstall
+```
+
+### Client
+
+Here install the lib:
+
+```bash
+pip install -e .
+```
+
+This way you will avoid installing the dependencies for self hosting the LLM.
+If you have already ran the `setup.sh` script, you can skip this step.
+Then run the client:
+
+```bash
+python client_tk.py
+```
 
 ## Tests
 

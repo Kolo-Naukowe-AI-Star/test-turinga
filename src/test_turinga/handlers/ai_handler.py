@@ -2,9 +2,9 @@ import logging
 import random
 from socket import socket
 
-from test_turinga.ai import AgentFactory
-from test_turinga.handlers.base import MessageHandler
-from test_turinga.message import Message
+from ..ai import AgentFactory
+from .base import MessageHandler
+from ..message import Message
 
 logger = logging.getLogger(__name__)
 

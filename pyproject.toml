@@ -8,7 +8,7 @@ version = "0.1.0"
 description = "LLM Turing test multiplayer game"
 readme = "README.md"
 requires-python = ">=3.10"
-dependencies = ["llama-cpp-python", "langchain_community", "pytest"]
+dependencies = ["pytest"]
 authors = [
   { name = "TCA" },
   {name = "Dewaszmi", email = "maciej.zyczynski@protonmail.com"}
@@ -17,6 +17,8 @@ authors = [
 [project.urls]
 url = "https://github.com/Kolo-Naukowe-AI-Star/test-turinga"
 
+[project.optional-dependencies]
+ai = ["llama-cpp-python", "langchain_community"]
+
 [tool.setuptools.packages.find]
 where = ["src"]
-

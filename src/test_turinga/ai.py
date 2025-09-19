@@ -1,5 +1,5 @@
 from logging import getLogger
-from typing import Sequence
+from collections.abc import Sequence
 
 from langchain_community.llms import LlamaCpp
 
@@ -11,11 +11,13 @@ class Agent:
 
     def __init__(self, prompt: str, llm: LlamaCpp):
         logger.debug("Agent __init__ called")
-        self.prompt = prompt
-        self.llm = llm
+        self.prompt: str = prompt
+        self.llm: LlamaCpp = llm
 
     def send_message(
-        self, message: str | None, previous_messages: Sequence[str] | None = None
+        self,
+        message: str | None,
+        previous_messages: Sequence[str] | None = None,
     ) -> str:
         logger.debug(f"send_message called with message: {message!r}")
         history_window = 16
@@ -38,7 +40,7 @@ class Agent:
 
         # logger.debug(f"Constructed prompt:\n{prompt}")
         try:
-            response = self.llm.invoke(prompt, stop=stop_tokens)
+            response: str = self.llm.invoke(prompt, stop=stop_tokens)
             logger.debug(f"Raw LLM response: {response}")
         except Exception as e:
             logger.error(f"Error calling LLM: {e}")
@@ -52,6 +54,8 @@ class Agent:
         logger.debug(f"Cleaned AI response: {cleaned_response}")
         return cleaned_response
 
+
+""" IDE na mnie krzyczało bo przecież nie można const nadpisywać :(
 
 MASTER_PROMPT = (  # Decent prompt for smaller models like 7B
     "Nazywasz się {name}, masz {age} lat. Jesteś człowiekiem. \n"
@@ -83,7 +87,9 @@ MASTER_PROMPT = (  # Prompt without personas
     "Nigdy nie powtarzaj słów Użytkownika.\n\n"
 )
 
-MASTER_PROMPT = (  # Prompt for larger models like 11B (with personas)
+"""
+
+BASIC_PROMPT = (  # Prompt for larger models like 11B (with personas)
     "Pod żadnym pozorem nie oferuj swojej pomocy i nie zadawaj pytań \n"
     "Nie używaj interpunkcji, nie używaj wykrzykników, nie używaj myślników.\n"
     "Partner to ty, Użytkownik to druga osoba.\n"
@@ -103,7 +109,7 @@ TEST_PERSONA = (  # need to add multiple personas
     "Twoje ulubione zajęcia to granie w gry komputerowe i spędzanie czasu z przyjaciółmi. "
 )
 
-MASTER_PROMPT = TEST_PERSONA + MASTER_PROMPT
+MASTER_PROMPT = TEST_PERSONA + BASIC_PROMPT
 # https://python.langchain.com/api_reference/community/llms/langchain_community.llms.llamacpp.LlamaCpp.html#llamacpp
 
 
@@ -112,7 +118,7 @@ class AgentFactory:
     def __init__(self, model_path: str):
         logger.debug("Loading LlamaCpp model...")
         # adjust parameters for cluster's gpu later
-        self.llm = LlamaCpp(
+        self.llm: LlamaCpp = LlamaCpp(
             model_path=model_path,
             n_gpu_layers=-1,
             n_batch=512,

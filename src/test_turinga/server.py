@@ -2,9 +2,9 @@ import logging
 import socket
 import threading
 from random import choice
-from typing import Sequence
+from collections.abc import Sequence
 
-from test_turinga.handlers.base import MessageHandler
+from .handlers.base import MessageHandler
 
 logger = logging.getLogger(__name__)
 
@@ -15,7 +15,7 @@ class Server:
     def __init__(self, handlers: Sequence[MessageHandler]):
         if len(handlers) == 0:
             raise ValueError("At least one handler must be provided")
-        self.handlers = handlers
+        self.handlers: Sequence[MessageHandler] = handlers
         logger.info("Server initialized")
 
     def main(self, host: str, port: int) -> None:
@@ -30,7 +30,7 @@ class Server:
             logger.info(f"Accepted connection from {addr}")
             threading.Thread(target=self.handle, args=(client_socket,)).start()
 
-    def handle(self, client_socket: socket) -> None:
+    def handle(self, client_socket: socket.socket) -> None:
         handler = choice(self.handlers)
         logger.info(f"Using handler {handler} for client {client_socket}")
         handler.handle(client_socket)
