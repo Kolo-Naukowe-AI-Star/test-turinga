@@ -5,7 +5,7 @@ from tkinter import scrolledtext
 
 from test_turinga import Message
 
-APP_NAME = "Test Turinga Client"
+APP_NAME = "Klient Testu Turinga"
 
 
 class Client:
@@ -23,7 +23,7 @@ class Client:
         self.entry.bind("<Return>", self.send_message)
 
         self.send_button = tk.Button(
-            self.master, text="Send", command=self.send_message
+            self.master, text="Wyślij", command=self.send_message
         )
         self.send_button.pack(side=tk.LEFT, padx=(5, 10), pady=(0, 10))
 
@@ -50,7 +50,7 @@ class Client:
         if msg and self.can_send:
             self.client_socket.sendall(Message(msg).bytes)
             self.entry.delete(0, tk.END)
-            self.append_message("You: " + msg)
+            self.append_message("Ty: " + msg)
             # Disable input if not your turn
             self.can_send = False
             self._update_turn_ui(enabled=False)
@@ -80,7 +80,7 @@ class Client:
                     continue
 
                 if text in ("Correct!", "Wrong!"):
-                    self.append_message("Result: " + text)
+                    self.append_message("Wynik: " + text.replace("Correct!", "Poprawnie!").replace("Wrong!", "Źle!"))
                     continue
 
                 self.append_message("Partner: " + text)
@@ -89,7 +89,7 @@ class Client:
 
     def send_decision(self, decision: str):
         self.client_socket.sendall(Message(decision).bytes)
-        self.append_message(f"You decided: {decision}")
+        self.append_message(f"Twój wybór: {decision}")
 
         for widget in self.decision_frame.winfo_children():
             widget.destroy()
@@ -98,13 +98,13 @@ class Client:
         for widget in self.decision_frame.winfo_children():
             widget.destroy()
 
-        tk.Label(self.decision_frame, text="Who do you think it was?").pack(
+        tk.Label(self.decision_frame, text="Kto to był?").pack(
             side=tk.LEFT, padx=5
         )
 
         human_button = tk.Button(
             self.decision_frame,
-            text="Human",
+            text="Człowiek",
             command=lambda: self.send_decision("HUMAN"),
             width=10,
         )
@@ -129,7 +129,7 @@ class Client:
         self.entry.config(state=state)
         self.send_button.config(state=state)
         self.turn_label.config(
-            text=("Your turn" if enabled else "Wait for your turn")
+            text=("Twoja tura" if enabled else "Poczekaj na swoją turę")
         )
 
     def on_close(self) -> None:
@@ -149,9 +149,9 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description=APP_NAME)
     parser.add_argument(
-        "--host", type=str, default="0.0.0.0", help="Server host"
+        "--host", type=str, default="0.0.0.0", help="Host serwera"
     )
-    parser.add_argument("--port", type=int, default=5000, help="Server port")
+    parser.add_argument("--port", type=int, default=5000, help="Port serwera")
     args = parser.parse_args()
 
     app = Client(args.host, args.port)

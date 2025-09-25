@@ -68,7 +68,7 @@ class AIHandler(MessageHandler):
             # Turn limit reached
             logger.debug("Max turns reached, sending decision prompt")
             self.safe_send(
-                client_socket, "DECISION: Who do you think it was? HUMAN or AI?"
+                client_socket, "DECISION: Kto to był? Człowiek czy AI?"
             )
             guess = Message.read(client_socket)
             logger.debug(f"User guess: {guess}")
