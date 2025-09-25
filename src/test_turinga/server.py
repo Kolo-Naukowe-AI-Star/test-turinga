@@ -3,6 +3,7 @@ import socket
 import threading
 from random import choice
 from collections.abc import Sequence
+from .message import Message
 
 from .handlers.base import MessageHandler
 
@@ -30,7 +31,28 @@ class Server:
             logger.info(f"Accepted connection from {addr}")
             threading.Thread(target=self.handle, args=(client_socket,)).start()
 
+
     def handle(self, client_socket: socket.socket) -> None:
-        handler = choice(self.handlers)
-        logger.info(f"Using handler {handler} for client {client_socket}")
-        handler.handle(client_socket)
+        while True:
+            handler = choice(self.handlers)
+            logger.info(f"Using handler {handler} for client {client_socket}")
+
+            if handler.__class__.__name__ == "UserHandler":
+                return handler.handle(client_socket) # return state for user handler
+
+            handler.handle(client_socket)
+
+            if client_socket.fileno() == -1:
+                logger.info(f"Socket for {client_socket} was closed, ending session.")
+                break
+
+            try:
+                msg = Message.read(client_socket)
+            except StopIteration:
+                logger.info("Socket closed, ending session.")
+                break
+
+            if str(msg).strip().upper() == "RESET_SESSION":
+                logger.info("Client requested reset. Restarting session.")
+                continue
+            break

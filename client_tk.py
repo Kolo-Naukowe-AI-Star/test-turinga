@@ -112,6 +112,19 @@ class Client:
 
         self.master.protocol("WM_DELETE_WINDOW", self.on_close)
 
+    def send_reset(self):
+        self.client_socket.sendall(Message("RESET_SESSION").bytes)
+
+        self.append_message("Restartowanie sesji...", tag="info")
+
+        self.text_area.config(state="normal")
+        self.text_area.delete(1.0, tk.END)
+        self.text_area.config(state="disabled")
+
+        for widget in self.decision_frame.winfo_children():
+            widget.destroy()
+        self.decision_frame.pack_forget() 
+
     def send_message(self, event: tk.Event | None = None) -> None:
         msg = self.entry.get()
         if msg and self.can_send:
@@ -166,7 +179,23 @@ class Client:
         for widget in self.decision_frame.winfo_children():
             widget.destroy()
 
+        reset_button = tk.Button(
+            self.decision_frame,
+            text="Zacznij od nowa",
+            command=self.send_reset,
+            width=15,
+            bg="#FF6600",
+            fg="white",
+            relief="flat",
+            activebackground="#CC5200",
+            activeforeground="white",
+            font=("Segoe UI", 10, "bold")
+        )
+        reset_button.pack(side=tk.LEFT, padx=5)
+
     def show_decision_buttons(self):
+        self.decision_frame.pack(side=tk.BOTTOM, fill=tk.X, pady=10)
+
         for widget in self.decision_frame.winfo_children():
             widget.destroy()
 
