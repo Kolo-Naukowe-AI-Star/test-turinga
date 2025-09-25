@@ -31,6 +31,7 @@ class AIHandler(MessageHandler):
         if ai_starts:  # TODO: replace safe send with send
             self.safe_send(client_socket, "TURN:WAIT")
             self.save_time()
+            logger.debug(f"Sent TURN:WAIT to client {client_socket.fileno()}")
             logger.debug("AI is starting the conversation...")
             # AI sends first message (history is empty)
             response = agent.send_message(None, message_log)
@@ -38,14 +39,15 @@ class AIHandler(MessageHandler):
             self.wait()
             message_log.append(f"Partner: {response}")
             self.safe_send(client_socket, response)
+            logger.debug(f"Sent AI response to client {client_socket.fileno()}: {response}")
             turn_count += 1
 
         try:
             while True:
                 self.safe_send(client_socket, "TURN:YOU")
                 # logger.debug("Waiting for user message...")
+                logger.debug(f"Sent TURN:YOU to client {client_socket.fileno()}")
                 user_message = Message.read(client_socket)
-                # logger.debug(f"Received from user: {user_message}")
                 message_log.append(f"Użytkownik: {user_message}")
                 turn_count += 1
 
@@ -53,6 +55,7 @@ class AIHandler(MessageHandler):
                     break
                 
                 self.safe_send(client_socket, "TURN:WAIT")
+                logger.debug(f"Sent TURN:WAIT to client {client_socket.fileno()} (AI is thinking)")
                 self.save_time()
                 # logger.debug("AI generating response...")
                 response = agent.send_message(str(user_message), message_log)
@@ -82,3 +85,7 @@ class AIHandler(MessageHandler):
             logger.error(f"Exception in AIHandler: {e}")
         finally:
             logger.info(f"Detaching AI agent from {client_socket}")
+            try:
+                client_socket.close()
+            except Exception:
+                pass

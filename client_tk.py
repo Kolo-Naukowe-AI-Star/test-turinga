@@ -108,14 +108,38 @@ class Client:
         self.running = True
         self.can_send = True
         self._update_turn_ui(enabled=True)
-        threading.Thread(target=self.receive_messages, daemon=True).start()
+        
+        self.receive_thread = threading.Thread(target=self.receive_messages, daemon=True)
+        self.receive_thread.start()
 
         self.master.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def send_reset(self):
-        self.client_socket.sendall(Message("RESET_SESSION").bytes)
+        print("DEBUG: Kliknięto reset")
+        print("Socket status:", self.client_socket.fileno())
 
-        self.append_message("Restartowanie sesji...", tag="info")
+        # stop old thread
+        self.running = False
+        if self.receive_thread and self.receive_thread.is_alive():
+            self.receive_thread.join(timeout=1)
+
+        try:
+            self.client_socket.sendall(Message("RESET_SESSION").bytes)
+            print("DEBUG: RESET_SESSION wysłany")
+        except Exception as e:
+            print("DEBUG: Błąd przy sendall:", e)
+
+        try:
+            self.client_socket.close()
+        except:
+            pass
+
+        # new socket and thread
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket.connect(("localhost", 8000))
+        self.running = True
+        self.receive_thread = threading.Thread(target=self.receive_messages, daemon=True)
+        self.receive_thread.start()
 
         self.text_area.config(state="normal")
         self.text_area.delete(1.0, tk.END)
@@ -140,6 +164,7 @@ class Client:
             try:
                 msg = Message.read(self.client_socket)
                 text = str(msg)
+                print("DEBUG: Otrzymano wiadomość:", text)
 
                 # Handle optional turn-control messages
                 if text.startswith("TURN:"):

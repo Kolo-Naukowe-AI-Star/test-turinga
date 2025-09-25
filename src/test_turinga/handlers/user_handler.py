@@ -16,6 +16,9 @@ class UserHandler(MessageHandler):
 
     def handle(self, client_socket: socket) -> None:
         with self.lock:
+            self.waiting_clients = [s for s in self.waiting_clients if s.fileno() != -1]
+            logger.debug(f"[BEFORE] Waiting list now: {[s.fileno() for s in self.waiting_clients]}")
+
             if self.waiting_clients:
                 partner_socket = self.waiting_clients.pop(0)
                 logger.info(
@@ -30,12 +33,15 @@ class UserHandler(MessageHandler):
                 logger.debug(f"Waiting for human client {client_socket}")
                 self.waiting_clients.append(client_socket)
 
+            logger.debug(f"[AFTER] Waiting list now: {[s.fileno() for s in self.waiting_clients]}")
+
     def handle_turns(self, client_a: socket, client_b: socket):
         current_sender, current_receiver = client_a, client_b
         turn_count = 0
 
         # Send initial turn notifications
         try:
+            logger.debug(f"Initial turns sent: sender={current_sender.fileno()}, receiver={current_receiver.fileno()}")
             current_sender.send(Message("TURN:YOU").bytes)
             current_receiver.send(Message("TURN:WAIT").bytes)
             self.save_time()
