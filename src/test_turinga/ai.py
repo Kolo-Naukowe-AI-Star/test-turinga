@@ -1,5 +1,6 @@
 from logging import getLogger
 from collections.abc import Sequence
+from threading import Lock
 
 from langchain_community.llms import LlamaCpp
 
@@ -9,10 +10,11 @@ logger = getLogger(__name__)
 class Agent:
     """Agent class that utilizes LLM to respond to messages."""
 
-    def __init__(self, prompt: str, llm: LlamaCpp):
+    def __init__(self, prompt: str, llm: LlamaCpp, lock: Lock):
         logger.debug("Agent __init__ called")
         self.prompt: str = prompt
         self.llm: LlamaCpp = llm
+        self.lock = lock
 
     def send_message(
         self,
@@ -40,7 +42,8 @@ class Agent:
 
         # logger.debug(f"Constructed prompt:\n{prompt}")
         try:
-            response: str = self.llm.invoke(prompt, stop=stop_tokens)
+            with self.lock:
+                response: str = self.llm.invoke(prompt, stop=stop_tokens)
             logger.debug(f"Raw LLM response: {response}")
         except Exception as e:
             logger.error(f"Error calling LLM: {e}")
@@ -117,6 +120,7 @@ class AgentFactory:
 
     def __init__(self, model_path: str):
         logger.debug("Loading LlamaCpp model...")
+        self.llm_lock = Lock()
         # adjust parameters for cluster's gpu later
         self.llm: LlamaCpp = LlamaCpp(
             model_path=model_path,
@@ -138,4 +142,4 @@ class AgentFactory:
     def new_agent(self, name: str, age: int) -> Agent:
         prompt = MASTER_PROMPT.format(name=name, age=age)
         logger.debug(f"Creating new agent with prompt:\n{prompt}\n")
-        return Agent(prompt=prompt, llm=self.llm)
+        return Agent(prompt=prompt, llm=self.llm, lock=self.llm_lock)
