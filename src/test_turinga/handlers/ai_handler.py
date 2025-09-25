@@ -20,6 +20,7 @@ class AIHandler(MessageHandler):
         self.identity_bank = identity_bank
 
     def handle(self, client_socket: socket) -> None:
+        turn_count = 0
         message_log: list[str] = []
         agent = self.agent_factory.new_agent(*random.choice(self.identity_bank))
 
@@ -37,7 +38,7 @@ class AIHandler(MessageHandler):
             self.wait()
             message_log.append(f"Partner: {response}")
             self.safe_send(client_socket, response)
-            self.increment_turn()
+            turn_count += 1
 
         try:
             while True:
@@ -46,11 +47,11 @@ class AIHandler(MessageHandler):
                 user_message = Message.read(client_socket)
                 # logger.debug(f"Received from user: {user_message}")
                 message_log.append(f"Użytkownik: {user_message}")
-                self.increment_turn()
+                turn_count += 1
 
-                if self.is_max_turns():
+                if turn_count >= self.MAX_MESSAGES:
                     break
-
+                
                 self.safe_send(client_socket, "TURN:WAIT")
                 self.save_time()
                 # logger.debug("AI generating response...")
@@ -59,9 +60,9 @@ class AIHandler(MessageHandler):
                 message_log.append(f"Partner: {response}")
                 self.wait()
                 self.safe_send(client_socket, response)
-                self.increment_turn()
+                turn_count += 1
 
-                if self.is_max_turns():
+                if turn_count >= self.MAX_MESSAGES:
                     break
 
             # Turn limit reached

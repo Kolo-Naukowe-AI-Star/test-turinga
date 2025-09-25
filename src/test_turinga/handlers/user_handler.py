@@ -32,7 +32,7 @@ class UserHandler(MessageHandler):
 
     def handle_turns(self, client_a: socket, client_b: socket):
         current_sender, current_receiver = client_a, client_b
-        self.turn_count = 0
+        turn_count = 0
 
         # Send initial turn notifications
         try:
@@ -47,9 +47,9 @@ class UserHandler(MessageHandler):
                 message = Message.read(current_sender)
                 self.wait()
                 current_receiver.send(message.bytes)
-                self.increment_turn()
+                turn_count += 1
 
-                if self.is_max_turns():
+                if turn_count >= self.MAX_MESSAGES:
                     self.safe_send(
                         client_a,
                         "DECISION: Who do you think it was? HUMAN or AI?",

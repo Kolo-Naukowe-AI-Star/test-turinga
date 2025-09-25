@@ -15,7 +15,6 @@ class MessageHandler(ABC):
     MIN_TURN_DURATION = 8
 
     def __init__(self):
-        self.turn_count = 0
         self.turn_time = 0
 
     @abstractmethod
@@ -26,14 +25,6 @@ class MessageHandler(ABC):
             client_socket.send(Message(message).bytes)
         except Exception:
             logger.warning(f"Failed to send message: {message}")
-
-    def increment_turn(self):
-        self.turn_count += 1
-        return self.turn_count
-
-    def is_max_turns(self):
-        """Return True if 10 messages have been sent (5 full turns)"""
-        return self.turn_count >= self.MAX_MESSAGES
 
     def save_time(self):
         self.turn_time = time.monotonic()
