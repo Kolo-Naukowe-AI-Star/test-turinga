@@ -1,7 +1,7 @@
 import logging
 import sys
 
-from test_turinga import Server, MessageHandler, AIHandler
+from test_turinga import Server, MessageHandler, AIHandler, UserHandler
 
 
 def main():
@@ -39,8 +39,8 @@ def main():
     )
 
     handlers: list[MessageHandler] = []
-    # if not args.no_user:
-    #     handlers.append(UserHandler())
+    if not args.no_user:
+        handlers.append(UserHandler())
     if args.model_path:
         handlers.append(AIHandler(args.model_path))
 
